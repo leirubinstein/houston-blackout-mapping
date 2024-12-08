@@ -1,0 +1,100 @@
+---
+title: "EDS 223 HWK 3"
+author: "Leilanie Rubinstein"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+execute: 
+  warning: false
+  message: false
+---
+
+# Identifying the impacts of extreme weather
+
+```{r}
+# Load libraries
+library(terra)
+library(sf)
+library(tidyverse)
+library(tmap)
+library(raster)
+library(stars)
+```
+
+```{r}
+# Import night lights data
+night_lights1 <- terra::rast(here::here("data", "VNP46A1/VNP46A1.A2021038.h08v05.001.2021039064328.tif"))
+night_lights2 <- terra::rast(here::here("data", "VNP46A1/VNP46A1.A2021038.h08v06.001.2021039064329.tif"))
+night_lights3 <- terra::rast(here::here("data", "VNP46A1/VNP46A1.A2021047.h08v05.001.2021048091106.tif"))
+night_lights4 <- terra::rast(here::here("data", "VNP46A1/VNP46A1.A2021047.h08v06.001.2021048091105.tif"))
+```
+
+```{r}
+# Merge and process night lights data
+night_lights_before <- terra::merge(night_lights1, night_lights2)
+night_lights_after <- terra::merge(night_lights3, night_lights4)
+
+# Calculate change in night lights
+night_lights_change <- night_lights_after - night_lights_before
+
+# Crop to Houston area
+houston_extent <- extent(c(-96.5, -94.5, 29, 30.5))
+night_lights_change_crop <- crop(night_lights_change, houston_extent)
+
+# Create blackout mask
+night_lights_change_crop[night_lights_change_crop > -200] <- NA
+night_lights_change_poly <- as.polygons(night_lights_change_crop) %>%
+  st_as_sf() %>%
+  st_make_valid() %>%
+  st_transform(crs = "EPSG:3083")
+```
+
+```{r}
+# Import and process infrastructure data
+roads <- read_sf(here::here("data", "gis_osm_roads_free_1.gpkg"), 
+                query = "SELECT * FROM gis_osm_roads_free_1 WHERE fclass='motorway'") %>%
+  st_transform(crs = "EPSG:3083")
+
+houses <- read_sf(here::here("data", "gis_osm_buildings_a_free_1.gpkg"),
+                 query = "SELECT * FROM gis_osm_buildings_a_free_1 
+                         WHERE (type IS NULL AND name IS NULL)
+                         OR type in ('residential', 'apartments', 'house', 'static_caravan', 'detached')") %>%
+  st_transform(crs = "EPSG:3083")
+```
+
+```{r}
+# Create road buffer
+roads_buffer <- st_buffer(roads, dist = 200)
+blackouts_200m <- st_difference(night_lights_change_poly, st_union(roads_buffer))
+```
+
+```{r}
+# Identify affected houses
+houses_filtered <- houses[blackouts_200m, ]
+houses_blackouts <- st_intersection(houses_filtered, blackouts_200m)
+```
+
+```{r}
+# Convert sf objects to SpatVector
+houses_vect <- vect(houses)
+blackouts_vect <- vect(blackouts_200m)
+
+# Perform the intersection
+houses_filtered <- intersect(houses_vect, blackouts_vect)
+
+# If you need it back as an sf object:
+houses_filtered <- st_as_sf(houses_filtered)
+```
+
+
+
+
+
+
+
+
+
+
+
+
