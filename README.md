@@ -1,4 +1,4 @@
-# Biodiversity Intactness Index change in Phoenix, AZ
+# Identifying the impacts of extreme weather on Houston's power grid during 2021 winter storms
 *This repository was produced as a part of the UCSB MEDS program for EDS 223: Geospatial Analysis & Remote Sensing.*
 
 ## About
