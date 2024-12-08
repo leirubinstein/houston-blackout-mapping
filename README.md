@@ -2,7 +2,9 @@
 *This repository was produced as a part of the UCSB MEDS program for EDS 223: Geospatial Analysis & Remote Sensing.*
 
 ## About
-This repository contains a Quarto document `houston-blackouts.qmd` visualizing the impacts of extreme weather on Houston's power grid. This exercise involves:
+During February of 2021, Texas suffered a major power crisis resulting from three unusually severe winter storms. This repository contains a Quarto document `houston-blackouts.qmd` visualizing the impacts of extreme weather on Houston's power grid by estimating the number of homes in the Houston metropolitan area that lost power and investigating whether not these impacts were disproportionately felt.
+
+This exercise involves:
 - loading vector/raster data
 - simple raster operations
 - simple vector operations
